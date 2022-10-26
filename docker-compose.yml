@@ -3,21 +3,37 @@ version: "3.9"
 services:
 
     postgres:
-        image: postgres:15.0-alpine
-        container_name: postgres
-        ports:
-          - "5432:5432"
-        volumes:
-          - oauth-server-db:/var/lib/postgresql/data
-        env_file:
-          - ./.env
-        restart: on-failure
-        logging:
-          options:
-            max-size: 10m
-            max-file: "3"
-        networks:
-          - oauth-server-net
+      image: postgres:15.0-alpine
+      container_name: postgres
+      ports:
+        - "5432:5432"
+      volumes:
+        - oauth-server-db:/var/lib/postgresql/data
+      env_file:
+        - ./.env
+      restart: on-failure
+      logging:
+        options:
+          max-size: 10m
+          max-file: "3"
+      networks:
+        - oauth-server-net
+
+    redis:
+      image: redis:7.0-alpine
+      container_name: redis
+      ports:
+        - 6379:6379
+      env_file:
+        - ./.env
+      command: redis-server
+      restart: on-failure
+      logging:
+        options:
+          max-size: 10m
+          max-file: "3"
+      networks:
+        - oauth-server-net
 
     server:
       container_name: oauth2-server
