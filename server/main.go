@@ -56,6 +56,7 @@ func serve(crtl *controller.Controller) {
 
 	e.GET("/health", crtl.Health)
 	e.POST("/token", crtl.Token)
+	e.GET("/validate", crtl.Validate)
 
 	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
 	// Use a buffered channel to avoid missing signals as recommended for signal.Notify

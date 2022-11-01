@@ -45,6 +45,17 @@ func (crtl *Controller) Standup() error {
 		// 	'{read, write}'::TEXT[],
 		// 	1
 		//   ) ON CONFLICT DO NOTHING;`,
+		`CREATE TABLE IF NOT EXISTS oauth2_server.tokens (
+			uid TEXT PRIMARY KEY,
+			refresh_token TEXT UNIQUE,
+			expires_at BIGINT,
+			user_id INT,
+			application_id INT
+		);`,
+		`ALTER TABLE oauth2_server.tokens ADD CONSTRAINT fk_tokens_applications 
+		FOREIGN KEY (application_id) REFERENCES oauth2_server.applications (id);`,
+		`ALTER TABLE oauth2_server.tokens ADD CONSTRAINT fk_tokens_users 
+		FOREIGN KEY (user_id) REFERENCES oauth2_server.applications (id);`,
 	}
 
 	for _, q := range queries {
