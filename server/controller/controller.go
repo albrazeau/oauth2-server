@@ -5,15 +5,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/net/context"
 )
 
 type Controller struct {
-	db  *sqlx.DB
-	rdb *redis.Client
+	db *sqlx.DB
 }
 
 func NewController() (*Controller, error) {
@@ -33,21 +31,7 @@ func NewController() (*Controller, error) {
 		return &Controller{}, err
 	}
 
-	redisAddr := fmt.Sprintf("%s:%s", getEnv("REDIS_HOST", "localhost"), getEnv("REDIS_PORT", "6379"))
-
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     redisAddr,
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-
-	rdbCtx, rdbCancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer rdbCancel()
-	if err := rdb.Ping(rdbCtx).Err(); err != nil {
-		return &Controller{}, err
-	}
-
-	return &Controller{db, rdb}, nil
+	return &Controller{db}, nil
 
 }
 
