@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,7 +15,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 )
+
+var tokenExpirationMinutes int
+
+func init() {
+	var err error
+	tokenExpirationMinutes, err = strconv.Atoi(os.Getenv("TOKEN_TIMEOUT_MINUTES"))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 type TokenRequestBody struct {
 	ClientID     string `json:"client_id"`
@@ -88,7 +100,7 @@ func (crtl *Controller) Token(c echo.Context) error {
 
 	claims.UID = uuid.New().String()
 	claims.Refresh = uuid.New().String()
-	claims.Expires = int(time.Now().Add(5 * time.Minute).Unix())
+	claims.Expires = int(time.Now().Add(time.Duration(tokenExpirationMinutes) * time.Minute).Unix())
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
@@ -160,4 +172,17 @@ func (crtl *Controller) ValidateClaimsAgainstDb(claims *Claims) bool {
 	}
 
 	return valid == 1
+}
+
+func (crtl *Controller) Refresh(c echo.Context) error {
+
+	var refreshTknBody struct {
+		Refresh string `json:"refresh_token"`
+	}
+	if err := c.Bind(&refreshTknBody); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusNotImplemented, "not implemented")
+
 }
